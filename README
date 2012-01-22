@@ -1,0 +1,21 @@
+Jimino is a irc framework written in python. It is inspired by irclib.py but aims to be a fully object oriented implementation with representaional objects of servers, users and channels.
+
+Configuration Defaults:
+
+irc.conf:
+
+[irc]
+debug = 0
+timeout = 0
+
+servers.conf:
+[network_name] # required but not important right now, will be used later with channel management
+server = irc.example.com
+port = 6667
+use_ssl = 0
+ipv6 = 0
+nickname = Jimino
+username = #inherits nickname
+realname = #inherits nickname
+localaddress = #Local bind address, leave blank unless you know what this does
+localport = 0 #Local bind port, leave 0 unless you know what this does
