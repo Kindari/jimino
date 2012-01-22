@@ -20,8 +20,6 @@ class EventDispatcher:
         self.register_mapping( mapping )
     
     def dispatch(self, irc, server, prefix, command, arguments):
-        print self.handles
-        print self.listeners
         if command.isdigit() and command in functions.numeric_events:
             command = functions.numeric_events[ command ]
         

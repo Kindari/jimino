@@ -6,6 +6,7 @@ import time
 
 from events import EventListener, EventDispatcher
 from entities import EntityManager
+import config
 
 class IRCError(Exception): pass
 
@@ -13,7 +14,7 @@ class IRC:
     def __init__(self):
         self.servers = []
         self.dispatcher = EventDispatcher()
-        self.run = True
+        self.running = True
         self.debug = False
 
     def server(self):
@@ -24,6 +25,18 @@ class IRC:
         return [server for server in self.servers if server.connected]
     def disconnected(self):
         return [server for server in self.servers if not server.connected]
+    def run(self, timeout = 0):
+        while self.running:
+            mapping = {}
+            for server in self.servers:
+                if server.socket:
+                    mapping[ server.socket ] = server
+            i, o, e = select.select( mapping.keys(), [], [] )
+            if i:
+                for socket in i:
+                    mapping[ socket ].process()
+            else:
+                time.sleep( timeout )
 
 class ServerError(IRCError): pass
 
@@ -45,21 +58,21 @@ class Server(EventListener):
         return self.server_name
 
     def connect(self, server, port = 6667, nickname="Jimino", password=None, username="Jimino",
-            realname="Jimino", localaddress="", localport=0, use_ssl=False, ipv6=False):
+            realname="Jimino", localaddress="", localport=0, use_ssl=False, ipv6=False, **options):
         if self.connected:
             self.disconnect()
         self.buffer = ""
         self.server_name = server
         self.nickname = nickname
-        self.port = port
+        self.port = int(port)
         self.username = username or nickname
         self.realname = realname or nickname
         self.server_password = password
         self._local_address = localaddress
-        self._local_port = localport
+        self._local_port = int(localport)
         self._localhost = socket.gethostname()
-        
-        if ipv6:
+
+        if bool(int(ipv6)):
             self.socket = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
         else:
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -170,24 +183,19 @@ class Server(EventListener):
             self.parseline( line )
             
 
-
-
-
 irc_linesep_regex = re.compile("\r?\n")
 irc_1459_line_regex = re.compile("^(:(?P<prefix>[^ ]+) +)?(?P<command>[^ ]+)( *(?P<arguments> .+))?")
 
 
-def quitter(event):
-    if "killroy" in ' '.join(event.arguments):
-        event.irc.run = False
-
 if __name__=="__main__":
+    settings = config.settings()
     irc = IRC()
-    irc.debug = True
-    irc.dispatcher.listen( quitter, "notice" )
-    server = irc.server()
-    server.connect("cahillmanley.com", 1337, password="jimino:jimino", use_ssl=True)
-    server.privmsg('Kindari', 'hi there')
-    while irc.run:
-        server.process()
-    server.quit()
+    irc.debug = bool( int( settings['debug'] ))
+    servers = config.servers()
+    for network in servers:
+        options = servers[ network ]
+        server = irc.server()
+        server.connect( **options )
+    irc.run( float(settings['timeout']) )
+    for server in irc.servers:
+        server.quit()

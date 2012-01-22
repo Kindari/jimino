@@ -1,2 +1,5 @@
 *.pyc
 *.sublime-*
+irc.conf
+servers.conf
+channels.conf
