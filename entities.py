@@ -26,10 +26,57 @@ class User(Entity):
         self.identifier = "%s!%s@%s" % (self.nickname, self.username, self.host)
     def __str__(self):
         return self.nickname
+    def invite(self, channel):
+        return self.server.invite(self, channel)
+    def kick(self, channel, message = None):
+        return self.server.kick(channel, self, message)
+    def notice(self, message):
+        return self.server.notice(self, message)
+    def who(self, op = False ):
+        return self.server.who( self, op )
+    def whois(self):
+        return self.server.whois(self)
+    def whowas(self, max, server):
+        return self.server.whowas(self, max, server)
+    def privmsg(self, message):
+        return self.server.privmsg(self, message)
+    say = privmsg
+    def action(self, message):
+        return self.server.action(self, message)
+    do = action
+    def ctcp(self, command, message = None):
+        return self.server.ctcp( self, command, message )
+    def ctcp_reply(self, parameter):
+        return self.server.ctcp_reply( self, parameter )
+    
 
 class Channel(Entity):
     def init(self):
         self.type = 'channel'
+    def invite(self, nick):
+        return self.server.invite(nick, self)
+    def kick(self, nick, message = None):
+        return self.server.kick(self, nick, message)
+    def list(self):
+        return self.server.list(self)
+    def names(self):
+        return self.server.names(self)
+    def notice(self, message):
+        return self.server.notice(self, message)
+    def part(self, message):
+        return self.server.part(self, message)
+    def topic(self, topic = None):
+        return self.server.topic( self, topic )
+    def privmsg(self, message):
+        return self.server.privmsg(self, message)
+    say = privmsg
+    def action(self, message):
+        return self.server.action(self, message)
+    do = action
+    def ctcp(self, command, message = None):
+        return self.server.ctcp(self, command, message)
+    def ctcp_reply(self, parameter):
+        return self.server.ctcp_reply( self, parameter )
 
 class EntityManager:
     def __init__(self, irc, server):
