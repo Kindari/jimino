@@ -136,10 +136,11 @@ class EventMessage(EntityEvent):
             listeners.extend( self.irc.dispatcher.listeners['message'] )
         EntityEvent.handle(self, listeners)
 
-class EventNotice(Event):
+class EventNotice(EntityEvent):
     def init(self):
         self.source = self.server.entity(self.prefix)
         self.target = self.server.entity(self.arguments[0])
+        self.entities = [self.source, self.target]
 
         self.message = message
 
@@ -156,18 +157,25 @@ class EventNotice(Event):
             listeners.extend( self.irc.dispatcher.listeners[ command ] )
         if 'notice' in self.irc.dispatcher.listeners:
             listeners.extend( self.irc.dispatcher.listeners['message'] )
-        Event.handle(self, listeners)
+        EntityEvent.handle(self, listeners)
 
-class EventJoin(Event):
+class EventJoin(EntityEvent):
     def init(self):
         self.source = self.server.entity(self.prefix)
         self.target = self.server.entity(self.arguments[0])
+        self.entities = [self.source, self.target]
         print "* %s has joined %s" % (self.source, self.target)
 
 class EventMotd(Event):
     def init(self):
         self.message = self.arguments[1]
         print self.message
+
+class EventCurrentTopic(EntityEvent):
+    def init(self):
+        self.target = self.server.entity( self.arguments[1] )
+        self.message = self.arguments[2]
+        self.entities = [self.target]
 
 mapping = {
     'ping'      : EventPing,
@@ -177,6 +185,7 @@ mapping = {
     'motd'      : EventMotd,
     'motdstart' : EventMotd,
     'endofmotd' : EventMotd,
+    'currenttopic' : EventCurrentTopic,
 }
 
 
