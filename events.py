@@ -1,7 +1,7 @@
 import functions
 import re
 
-event_listener_regex = re.compile("^on(?P<command>[A-Z][a-z]*$)")
+event_listener_regex = re.compile("^on(?P<command>[a-zA-Z0-9]*$)")
 
 class EventError(Exception): pass
 
