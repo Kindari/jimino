@@ -53,6 +53,7 @@ class User(Entity):
 class Channel(Entity):
     def init(self):
         self.type = 'channel'
+        self.topic = ''
     def invite(self, nick):
         return self.server.invite(nick, self)
     def kick(self, nick, message = None):
@@ -77,6 +78,9 @@ class Channel(Entity):
         return self.server.ctcp(self, command, message)
     def ctcp_reply(self, parameter):
         return self.server.ctcp_reply( self, parameter )
+
+    def onCurrentTopic(self, event):
+        self.topic = event.message
 
 class EntityManager:
     def __init__(self, irc, server):
