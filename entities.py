@@ -54,6 +54,11 @@ class Channel(Entity):
     def init(self):
         self.type = 'channel'
         self.topic = ''
+        self.users = []
+
+    def __iter__(self):
+        return self.users
+
     def invite(self, nick):
         return self.server.invite(nick, self)
     def kick(self, nick, message = None):
@@ -78,9 +83,18 @@ class Channel(Entity):
         return self.server.ctcp(self, command, message)
     def ctcp_reply(self, parameter):
         return self.server.ctcp_reply( self, parameter )
+    def who(self):
+        return self.server.who(self)
 
     def onCurrentTopic(self, event):
         self.topic = event.message
+    def onEndOfNames(self, event):
+        self.who()
+    def onWhoReply(self, event):
+        if not event.target in self.users:
+            self.users.append(event.target)
+    def onEndOfWho(self, event):
+        print self.users
 
 class EntityManager:
     def __init__(self, irc, server):
