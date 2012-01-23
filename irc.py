@@ -133,6 +133,14 @@ class Server(EventListener):
 
     def pong(self, *args):
         self.raw("PONG %s" % ' '.join(args))
+    def ctcp(self, target, command, message = None):
+        if message:
+            return self.privmsg( target, "\001%s %s\001" % (command.upper(), message) )
+        return self.privmsg(target, "\001%s\001" % command.upper())
+    def ctcp_reply(self, target, parameter):
+        return self.notice( target, "\001%s\001" % parameter )
+    def action(self, target, message):
+        return self.ctcp(target, 'action', message)
 
     def raw(self, s):
         if not self.connected:
