@@ -113,26 +113,147 @@ class Server(EventListener):
             pass
         self.socket = None
 
+    def admin(self, server=None):
+        if server:
+            return self.raw("ADMIN %s" % server)
+        return self.raw("ADMIN")
+    def globops(self, text):
+        return self.raw("GLOBOPS :%s" % text)
+    def info(self, server=None):
+        if server:
+            return self.raw("INFO %s" % server)
+        return self.raw("INFO")
+    def invite(self, nickname, channel):
+        return self.raw("INVITE %s %s" % (nickname, channel))
+    def ison(self, nicks):
+        return self.raw("ISON %s" % ' '.join(nicks))
+    def join(self, channel, key=None):
+        if key:
+            return self.raw("JOIN %s %s" % (channel, key))
+        return self.raw("JOIN %s" % channel)
+    def kick(self, channel, nickname, comment = None):
+        if comment:
+            return self.raw("KICK %s %s :%s" % (channel, nickname, comment))
+        return self.raw("KICK %s %s" % (channel, nickname))
+    def links(self, server = None, mask = None):
+        raw = "LINKS"
+        if server:
+            raw += " %s" % server
+        if mask:
+            raw += " %s" % mask
+        return self.raw( raw )
+    def list(self, channels = None, server = None):
+        raw = "LIST"
+        if channels:
+            raw += ' '
+            raw += ' '.join(channels)
+        if server:
+            raw += ' %s' % server
+        return self.raw( raw )
+    def lusers(self, server = None):
+        if server:
+            return self.raw( "LUSERS %s" % server )
+        return self.raw("LUSERS")
+    def mode(self, target, command):
+        #@todo add smart logic here
+        return self.raw("MODE %s %s" % (target, command))
+    def motd(self, server = None):
+        if server:
+            return self.raw("MOTD %s" % server)
+        return self.raw("MOTD")
+    def names(self, channels = None):
+        if channels:
+            return self.raw("NAMES %s" % ' '.join(channels))
+        return self.raw("NAMES")
+    def notice(self, target, text):
+        return self.raw("NOTICE %s :%s" % (target, text))
+    def oper(self, nick, password):
+        return self.raw("OPER %s %s" % (nick, password))
+    def part(self, channels, message = None):
+        if type(channels)==list:
+            channels = ' '.join(channels)
+        if message:
+            return self.raw("PART %s :%s" % (channels, message))
+        return self.raw("PART %s" % channels)
+    
+
+
     def nick(self, nickname):
-        self.raw("NICK %s" % nickname )
+        return self.raw("NICK %s" % nickname )
 
     def user(self, username, realname):
-        self.raw("USER %s 0 * :%s" % (username, realname))
+        return self.raw("USER %s 0 * :%s" % (username, realname))
 
     def password(self, password):
-        self.raw("PASS %s" % password)
+        return self.raw("PASS %s" % password)
 
     def quit(self, message = None):
-        if message is None:
-            self.raw("QUIT")
-        else:
-            self.raw("QUIT :%s" % message)
+        if message:
+            return self.raw("QUIT :%s" % message)
+        return self.raw("QUIT")
+    def squit(self, server, message = None):
+        if message:
+            return self.raw("SQUIT %s :%s" % (server, message))
+        return self.raw("SQUIT %s" % server)
+    def stats(self, command, server = None):
+        if server:
+            return self.raw("STATS %s %s" % (command, server))
+        return self.raw("STATS %s" % command)
+    def time(self, server=None):
+        if server:
+            return self.raw("TIME %s" % server)
+        return self.raw("TIME")
+    def topic(self, channel, topic = None):
+        if topic:
+            return self.raw("TOPIC %s :%s" % (channel, topic))
+        return self.raw("TOPIC %s" % channel)
+    def trace(self, target = None):
+        if target:
+            return self.raw("TRACE %s" % target)
+        return self.raw("TRACE")
+    def userhost(self, nickname):
+        if type(nickname)==list:
+            nickname = ','.join(nickname)
+        return self.raw("USERHOST %s" % nickname)
+    def users(self, server = None):
+        if server:
+            return self.raw("USERS %s" % server)
+        return self.raw("USERS")
+    def version(self, server = None):
+        if server:
+            return self.raw("VERSION %s" % server)
+        return self.raw("VERSION")
+    def wallops(self, text):
+        return self.raw("WALLOPS :%s" % text)
+    def who(self, target = None, op = False):
+        raw = "WHO"
+        if target:
+            raw += " %s" % target
+        if op:
+            raw += " o"
+        return self.raw( raw )
+    def whois(self, target):
+        if (type(target)==list):
+            target = ','.join(target)
+        return self.raw("WHOIS %s" % target)
+    def whowas(self, target, max = None, server = None):
+        raw = "WHOWAS %s" % target
+        if max:
+            raw += " %s" % max
+        if server:
+            raw += " %s" % server
+        return self.raw( raw )
+    
 
     def privmsg(self, target, message):
-        self.raw("PRIVMSG %s :%s" % (target, message))
+        if (type(target)==list):
+            target = ','.join(target)
+        return self.raw("PRIVMSG %s :%s" % (target, message))
 
+    def ping(self, *args):
+        return self.raw("PING %s" % ' '.join(args))
     def pong(self, *args):
-        self.raw("PONG %s" % ' '.join(args))
+        return self.raw("PONG %s" % ' '.join(args))
     def ctcp(self, target, command, message = None):
         if message:
             return self.privmsg( target, "\001%s %s\001" % (command.upper(), message) )
