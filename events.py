@@ -177,6 +177,33 @@ class EventCurrentTopic(EntityEvent):
         self.message = self.arguments[2]
         self.entities = [self.target]
 
+nick_with_mode_regex = re.compile('^(?P<mode>[+%@!&~])?(?P<nickname>.*)')
+
+class EventNamReply(EntityEvent):
+    def init(self):
+        self.source = self.server.entity( self.arguments[2] )
+        self.entities = [self.source]
+        self.arguments = self.arguments[3].split()
+        self.users = {}
+        for mode, nickname in [nick_with_mode_regex.match(name).groups() for name in self.arguments]:
+            self.users[nickname] = mode
+class EventEndOf(EntityEvent):
+    def init(self):
+        self.source = self.server.entity( self.arguments[1] )
+        self.entities = [self.source]
+
+class EventWhoReply(EntityEvent):
+    def init(self):
+        #arguments
+        # self channel username hostname server nickname mode? 0-realname
+        self.source = self.server.entity( self.arguments[1] )
+        self.nickname = self.arguments[5]
+        self.username = self.arguments[2]
+        self.hostname = self.arguments[3]
+        self.target = self.server.entity( "%s!%s@%s" % (self.nickname, self.username, self.hostname ))
+        self.entities = [self.source, self.target]
+
+
 mapping = {
     'ping'      : EventPing,
     'privmsg'   : EventMessage,
@@ -186,6 +213,10 @@ mapping = {
     'motdstart' : EventMotd,
     'endofmotd' : EventMotd,
     'currenttopic' : EventCurrentTopic,
+    'namreply'  : EventNamReply,
+    'endofnames': EventEndOf,
+    'endofwho'  : EventEndOf,
+    'whoreply'  : EventWhoReply,
 }
 
 
