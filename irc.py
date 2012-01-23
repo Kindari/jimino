@@ -1,7 +1,7 @@
 import select
 import re
 import socket, ssl
-import os, sys
+import os, sys, signal
 import time
 
 from events import EventListener, EventDispatcher
@@ -37,6 +37,11 @@ class IRC:
                     mapping[ socket ].process()
             else:
                 time.sleep( timeout )
+    def shutdown(self, *args):
+        self.running = False
+        print "Shutdown complete"
+        os.remove('irc.pid')
+        sys.exit(0)
 
 class ServerError(IRCError): pass
 
@@ -191,6 +196,16 @@ if __name__=="__main__":
     settings = config.settings()
     irc = IRC()
     irc.debug = bool( int( settings['debug'] ))
+
+    signal.signal( signal.SIGTERM, irc.shutdown )
+    if irc.debug:
+        print "Registered SIGTERM handler"
+    
+    with open('irc.pid', 'w') as f:
+        f.write( str(os.getpid()) )
+        if irc.debug:
+            print "irc.pid wrote [%s]" % os.getpid()
+
     servers = config.servers()
     for network in servers:
         options = servers[ network ]

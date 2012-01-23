@@ -3,3 +3,4 @@
 irc.conf
 servers.conf
 channels.conf
+irc.pid
