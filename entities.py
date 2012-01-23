@@ -1,7 +1,7 @@
 import re
-from events import EventListener
+from events import RelevantEventListener
 
-class Entity(EventListener):
+class Entity(RelevantEventListener):
     def __init__(self, manager, irc, server, identifier):
         self.manager = manager
         self.irc = irc
@@ -9,7 +9,7 @@ class Entity(EventListener):
         self.identifier = identifier
         self.type = 'entity'
         self.init()
-        EventListener.__init__(self, irc.dispatcher)
+        RelevantEventListener.__init__(self, irc.dispatcher)
     def __repr__(self):
         return '<%s "%s">' % ( self.__class__, self.identifier )
     def __str__(self):
@@ -26,9 +26,6 @@ class User(Entity):
         self.identifier = "%s!%s@%s" % (self.nickname, self.username, self.host)
     def __str__(self):
         return self.nickname
-    def onPubmsg(self, event):
-        if event.source==self:
-            print "pubmsg", event.source, event.target, event.message
 
 class Channel(Entity):
     def init(self):

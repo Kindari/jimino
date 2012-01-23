@@ -7,10 +7,32 @@ class EventError(Exception): pass
 
 class EventListener:
     def __init__(self, dispatcher):
-        methods = [method for method in dir(self) if event_listener_regex.match(method)]
-        for method in methods:
-            command = event_listener_regex.match(method).group('command')
-            dispatcher.listen( getattr(self, 'on%s' % command), command.lower())
+        self.dispatcher = dispatcher
+        self.register_mapping()
+
+    def register_mapping(self):
+        mapping = self.find_event_listeners()
+        for command, method in mapping.items():
+            self.dispatcher.listen( method, command )
+    def find_event_listeners(self):
+        mapping = {}
+        matches = [event_listener_regex.match(prop)
+                    for prop in dir(self) if event_listener_regex.match(prop)]
+        for match in matches:
+            method = getattr(self, match.group())
+            if callable(method):
+                mapping[ match.group('command').lower() ] = method
+        return mapping
+
+
+class RelevantEventListener(EventListener):
+    def register_mapping(self):
+        self._event_mapping = self.find_event_listeners()
+    def __call__(self, event):
+        if event.command in self._event_mapping:
+            self._event_mapping[ event.command ]( event )
+    
+
 
 class EventDispatcher:
     def __init__(self):
@@ -66,15 +88,23 @@ class Event:
         if self.irc.debug:
             print self.prefix, self.command, self.arguments
 
+class EntityEvent(Event):
+    def __init__(self, *arguments ):
+        self.entities = []
+        Event.__init__( self, *arguments )
+    def handle(self, listeners):
+        listeners.extend( self.entities )
+        Event.handle(self, listeners)
+
 class EventPing(Event):
     def init(self):
         self.server.pong( *self.arguments )
 
-class EventMessage(Event):
+class EventMessage(EntityEvent):
     def init(self):
         self.source = self.server.entity(self.prefix)
         self.target = self.server.entity(self.arguments[0])
-        print self.source, self.target
+        self.entities = [ self.source, self.target ]
 
         action = False
 
@@ -104,7 +134,7 @@ class EventMessage(Event):
                 listeners.extend( self.irc.dispatcher.listeners[ self.command ] )
         if 'message' in self.irc.dispatcher.listeners:
             listeners.extend( self.irc.dispatcher.listeners['message'] )
-        Event.handle(self, listeners)
+        EntityEvent.handle(self, listeners)
 
 class EventNotice(Event):
     def init(self):
