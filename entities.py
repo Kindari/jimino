@@ -29,6 +29,8 @@ class User(Entity):
         return self.channels
     def __str__(self):
         return self.nickname
+    def __repr__(self):
+        return '<User "%s">' % self.nickname
     def invite(self, channel):
         return self.server.invite(self, channel)
     def kick(self, channel, message = None):
