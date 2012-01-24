@@ -165,6 +165,12 @@ class EventJoin(EntityEvent):
         self.target = self.server.entity(self.arguments[0])
         self.entities = [self.source, self.target]
         print "* %s has joined %s" % (self.source, self.target)
+class EventPart(EntityEvent):
+    def init(self):
+        self.source = self.server.entity( self.prefix )
+        self.target = self.server.entity( self.arguments[0] )
+        self.entities = [self.source, self.target]
+
 
 class EventMotd(Event):
     def init(self):
@@ -203,15 +209,31 @@ class EventWhoReply(EntityEvent):
         self.target = self.server.entity( "%s!%s@%s" % (self.nickname, self.username, self.hostname ))
         self.entities = [self.source, self.target]
 
+class EventQuit(EntityEvent):
+    def init(self):
+        self.source = self.server.entity( self.prefix )
+        self.entities = [self.source]
+        if self.source.type=='user' and self.source.channels:
+            self.entities.extend(self.source.channels)
+        self.message = event.arguments[0]
+
+class EventNick(EntityEvent):
+    def init(self):
+        self.source = self.server.entity( self.prefix )
+        self.entities = [ self.source ]
+        self.target = self.arguments[0]
 
 mapping = {
     'ping'      : EventPing,
     'privmsg'   : EventMessage,
     'join'      : EventJoin,
+    'nick'      : EventNick,
+    'part'      : EventPart,
+    'quit'      : EventQuit,
     'notice'    : EventNotice,
     'motd'      : EventMotd,
     'motdstart' : EventMotd,
-    'endofmotd' : EventMotd,
+    'endofmotd' : EventEndOf,
     'currenttopic' : EventCurrentTopic,
     'namreply'  : EventNamReply,
     'endofnames': EventEndOf,
