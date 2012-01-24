@@ -215,7 +215,7 @@ class EventQuit(EntityEvent):
         self.entities = [self.source]
         if self.source.type=='user' and self.source.channels:
             self.entities.extend(self.source.channels)
-        self.message = event.arguments[0]
+        self.message =  self.arguments[0]
 
 class EventNick(EntityEvent):
     def init(self):
