@@ -24,6 +24,9 @@ class User(Entity):
         self.username = self.identifier.group('username')
         self.host = self.identifier.group('host')
         self.identifier = "%s!%s@%s" % (self.nickname, self.username, self.host)
+        self.channels = []
+    def __iter__(self):
+        return self.channels
     def __str__(self):
         return self.nickname
     def invite(self, channel):
@@ -48,6 +51,21 @@ class User(Entity):
         return self.server.ctcp( self, command, message )
     def ctcp_reply(self, parameter):
         return self.server.ctcp_reply( self, parameter )
+    def onJoin(self, event):
+        if not event.target in self.channels:
+            self.channels.append( event.target )
+    def onPart(self, event):
+        if event.target in self.channels:
+            self.channels.remove( event.target )
+    def onWhoReply(self, event):
+        if not event.source in self.channels:
+            self.channels.append(event.source)
+    def onQuit(self, event):
+        del self.manager.users[ self.nickname.lower() ]
+    def onNick(self, event):
+        del self.manager.users[ self.nickname.lower() ]
+        self.nickname = event.target
+        self.manager.users[ self.nickname.lower() ] = self
     
 
 class Channel(Entity):
@@ -95,6 +113,15 @@ class Channel(Entity):
             self.users.append(event.target)
     def onEndOfWho(self, event):
         print self.users
+    def onJoin(self, event):
+        if not event.source in self.users:
+            self.users.append( event.source )
+    def onPart(self, event):
+        if event.source in self.users:
+            self.users.remove( event.source )
+    def onQuit(self, event):
+        if event.source in self.users:
+            self.users.remove( event.source )
 
 class EntityManager:
     def __init__(self, irc, server):
