@@ -5,7 +5,7 @@ Jimino is an IRC framework written in Python. It is inspired by irclib.py, but a
 License
 =======
 
-Jimino is offered as free software: it is offered under the terms of the Do What The Fuck You Want To Public License(WTFPL). If the terms of this license are not suitable, you may choose to to license it under the GNU General Public License as published by the Free Software Foundation, either version 3 of that License, or (at your option) any later version.
+Jimino is offered as free software. It comes without any warranty, to the extent permitted by applicable law. It is offered under the terms of the Do What The Fuck You Want To Public License(WTFPL) version 2, as published by Sam Hocevar. If the terms of this license are not suitable, you may choose to to license it under the GNU General Public License as published by the Free Software Foundation, either version 3 of that License, or (at your option) any later version.
 
 When obtained under the Do What The Fuck You Want To Public License, Jimino is distributed with good faith that it will not delete all your data, cause a band of furious weasels to infest your undergarments, or call you naughty names, but without any guarantees whatsoever. The authors of Jimino ask kindly that you submit any improvements back to the parent project, but remind you that you are free to do what the fuck you want to. You should have received a copy of the Do What The Fuck You Want To Public License along with Jimino. If not, you may obtain it [here](http://sam.zoy.org/wtfpl/)
 
