@@ -3,6 +3,8 @@ import re
 import socket, ssl
 import os, sys, signal
 import time
+import ConfigParser
+import imp
 
 from events import EventListener, EventDispatcher
 from entities import EntityManager
@@ -16,6 +18,7 @@ class IRC:
         self.dispatcher = EventDispatcher()
         self.running = True
         self.debug = False
+        self.mods = {}
 
     def server(self):
         server = Server( self )
@@ -42,6 +45,16 @@ class IRC:
         print "Shutdown complete"
         os.remove('irc.pid')
         sys.exit(0)
+    def load_modules(self):
+        p = ConfigParser.SafeConfigParser()
+        p.read('modules.conf')
+        for section in p.sections():
+            if os.path.exists('%s.py' % section.lower()):
+                mod = imp.load_source(section, '%s.py' % section.lower())
+                self.mods[ section ] = mod
+                if hasattr(mod, 'load_module'):
+                    mod.load_module(self)
+
 
 class ServerError(IRCError): pass
 
@@ -324,6 +337,7 @@ irc_1459_line_regex = re.compile("^(:(?P<prefix>[^ ]+) +)?(?P<command>[^ ]+)( *(
 if __name__=="__main__":
     settings = config.settings()
     irc = IRC()
+    irc.load_modules()
     irc.debug = bool( int( settings['debug'] ))
 
     signal.signal( signal.SIGTERM, irc.shutdown )
