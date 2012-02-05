@@ -142,7 +142,7 @@ class EventNotice(EntityEvent):
         self.target = self.server.entity(self.arguments[0])
         self.entities = [self.source, self.target]
 
-        self.message = message
+        self.message = self.arguments[1]
 
         if self.target.type=='channel':
             self.command = 'pubnotice'
