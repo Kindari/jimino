@@ -146,7 +146,6 @@ class EventNotice(EntityEvent):
             self.command = 'pubnotice'
         else:
             self.command = 'privnotice'
-        print "%s:[%s] <%s> %s" % (self.command, self.target, self.source, self.message)
     
     def handle(self, listeners):
         listeners = []
@@ -162,7 +161,6 @@ class EventJoin(EntityEvent):
         self.source = self.server.entity(self.prefix)
         self.target = self.server.entity(self.arguments[0])
         self.entities = [self.source, self.target]
-        print "* %s has joined %s" % (self.source, self.target)
 class EventPart(EntityEvent):
     def init(self):
         self.source = self.server.entity( self.prefix )
@@ -173,7 +171,6 @@ class EventPart(EntityEvent):
 class EventMotd(Event):
     def init(self):
         self.message = self.arguments[1]
-        print self.message
 
 class EventCurrentTopic(EntityEvent):
     def init(self):
