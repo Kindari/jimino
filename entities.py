@@ -124,6 +124,8 @@ class Channel(Entity):
             self.users.remove( event.source )
 
 class EntityManager:
+    user_regex = re.compile("^(?P<nickname>.*)!(?P<username>.*)@(?P<host>.*)$")
+
     def __init__(self, irc, server):
         self.irc = irc
         self.server = server
@@ -131,7 +133,7 @@ class EntityManager:
         self.channels = {}
     
     def __call__(self, identifier):
-        user_match = irc_user_regex.match(identifier)
+        user_match = self.user_regex.match(identifier)
         if user_match:
             nick = user_match.group('nickname').lower()
             if nick in self.users:
@@ -151,4 +153,3 @@ class EntityManager:
             return Entity(self, self.irc, self.server, identifier)
         
 
-irc_user_regex = re.compile("^(?P<nickname>.*)!(?P<username>.*)@(?P<host>.*)$")

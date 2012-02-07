@@ -1,11 +1,10 @@
 import functions
 import re
 
-event_listener_regex = re.compile("^on(?P<command>[a-zA-Z0-9]*$)")
-
 class EventError(Exception): pass
 
 class EventListener:
+    regex = re.compile("^on(?P<command>[a-zA-Z0-9]*$)")
     def __init__(self, dispatcher):
         self.dispatcher = dispatcher
         self.register_mapping()
@@ -16,8 +15,8 @@ class EventListener:
             self.dispatcher.listen( method, command )
     def find_event_listeners(self):
         mapping = {}
-        matches = [event_listener_regex.match(prop)
-                    for prop in dir(self) if event_listener_regex.match(prop)]
+        matches = [self.regex.match(prop)
+                    for prop in dir(self) if self.regex.match(prop)]
         for match in matches:
             method = getattr(self, match.group())
             if callable(method):
@@ -178,15 +177,16 @@ class EventCurrentTopic(EntityEvent):
         self.message = self.arguments[2]
         self.entities = [self.target]
 
-nick_with_mode_regex = re.compile('^(?P<mode>[+%@!&~])?(?P<nickname>.*)')
+
 
 class EventNamReply(EntityEvent):
+    regex = re.compile('^(?P<mode>[+%@!&~])?(?P<nickname>.*)')
     def init(self):
         self.source = self.server.entity( self.arguments[2] )
         self.entities = [self.source]
         self.arguments = self.arguments[3].split()
         self.users = {}
-        for mode, nickname in [nick_with_mode_regex.match(name).groups() for name in self.arguments]:
+        for mode, nickname in [self.regex.match(name).groups() for name in self.arguments]:
             self.users[nickname] = mode
 class EventEndOf(EntityEvent):
     def init(self):
