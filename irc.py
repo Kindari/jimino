@@ -293,7 +293,7 @@ class Server(EventListener):
         if not self.connected:
             raise ServerError, "Not Connected"
         try:
-            if self.ssl: #@todo Non blocking reads using select
+            if self.ssl:
                 new_data = self.ssl.read(bitrate)
             else:
                 new_data = self.socket.recv(bitrate)

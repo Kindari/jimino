@@ -113,8 +113,6 @@ class Channel(Entity):
     def onWhoReply(self, event):
         if not event.target in self.users:
             self.users.append(event.target)
-    def onEndOfWho(self, event):
-        print self.users
     def onJoin(self, event):
         if not event.source in self.users:
             self.users.append( event.source )
