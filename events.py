@@ -123,8 +123,6 @@ class EventMessage(EntityEvent):
                 self.command = 'pubmsg'
         elif action:
             self.command = 'privaction'
-        
-        print "%s:[%s] <%s> %s" % (self.command, self.target, self.source, self.message)
     
     def handle(self, listeners):
         if not self.command == 'privmsg':
