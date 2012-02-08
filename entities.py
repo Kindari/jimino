@@ -152,4 +152,10 @@ class EntityManager:
         else:
             return Entity(self, self.irc, self.server, identifier)
         
+class Modelist:
+    def __init__(self, channel, mode):
+        self.channel = channel
+        self.mode = mode
+    def __repr__(self):
+        return "<Modelist +%s for %s" % ( self.mode, self.channel )
 
