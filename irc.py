@@ -70,6 +70,7 @@ class Server(EventListener):
         self.ssl = None
         self.entity = EntityManager(self.irc, self)
         self.chan_prefix = "#"
+        self.supports = Supports(self)
         EventListener.__init__(self, irc.dispatcher)
 
     def __repr__(self):
@@ -329,6 +330,58 @@ class Server(EventListener):
         for line in self.readlines():
             self.parseline( line )
             
+
+class Supports:
+    search_mode_filter = 1
+    search_mode_all = 2
+
+    def __init__(self, server):
+        self.server = server
+        self.isupport = {}
+    def __call__(self, parameter, search_mode = 1 ):
+        if type(parameter)==str:
+            parameter = parameter.lower()
+            if parameter in self.isupport:
+                return self.isupport[ parameter ] or True # if parameter has no value, return that it simply exists
+            return False
+        elif type(parameter)==list:
+            parameters = [param.lower() for param in parameter]
+            if search_mode==self.search_mode_all:
+                for param in parameters:
+                    if not param in self.isupport:
+                        return False
+            return [ (param, self.isupport[param] or True) for param in parameters if param in self.isupport ]
+
+    def __getattr__(self, parameter):
+        if parameter.lower() in self.isupport:
+            return self.isupport[ parameter.lower() ]
+        raise AttributeError, "Server does not support %s" % parameter
+    def __setattr__(self, parameter, value):
+        self.isupport[ parameter.lower() ] = value
+    def __delattr__(self, parameter):
+        if parameter.lower() in self.isupport:
+            del self.isupport[ parameter.lower() ]
+        raise AttributeError, "Cannot delete unsupported parameter: %s" % parameter
+
+    def __lt__(self, parameter): return NotImplemented
+    def __le__(self, parameter): return NotImplemented
+    def __ge__(self, parameter): return NotImplemented
+    def __gt__(self, parameter): return NotImplemented
+
+    def __eq__(self, parameter):
+        return self(parameter, self.search_mode_all)
+    def __ne__(self, parameter):
+        if self(parameter, self.search_mode_all):
+            return False
+        return True
+    def __contains__(self, parameter):
+        return self(parameter, self.search_mode_all)
+
+    def add(self, parameter, value): return self.__setattr__( parameter, value)
+    def remove(self, parameter): return self.__delattr__(parameter)
+                
+
+
 
 irc_linesep_regex = re.compile("\r?\n")
 irc_1459_line_regex = re.compile("^(:(?P<prefix>[^ ]+) +)?(?P<command>[^ ]+)( *(?P<arguments> .+))?")
